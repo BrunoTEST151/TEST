@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Room Schedule</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 25px;
+      background-color: #121212;
+      color: #ffffff;
+      text-align: center;
+    }
+
+    #rss-feed {
+      margin-top: 20px;
+    }
+
+    .event,
+    .available {
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 8px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .event {
+      background-color: #000000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+    }
+
+    .happening-now {
+      background-color: #ff4500;
+      box-shadow: 0 4px 12px rgba(255, 69, 0, 0.9);
+    }
+
+    .available {
+      background-color: #008000;
+      color: #ffffff;
+      font-size: 28px;
+    }
+
+    .event h3 a {
+      font-size: 26px;
+      color: #00bfff;
+      text-decoration: none;
+    }
+
+    .event h3 a:hover {
+      text-decoration: underline;
+    }
+
+    .event p {
+      font-size: 18px;
+      color: #f1f1f1;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="status-now"></div>
+  <div id="upcoming-events"></div>
+
+  <script>
+    async function loadRSS() {
+      const feedUrl = 'https://corsproxy.io/?https://lewistonlibrary.libcal.com/rss.php?cid=6249&m=week';
+
+      try {
+        const response = await fetch(feedUrl);
+        const rssText = await response.text();
+
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(rssText, 'text/xml');
+
+        const items = xml.querySelectorAll('item');
+        const statusNowContainer = document.getElementById('status-now');
+        const upcomingEventsContainer = document.getElementById('upcoming-events');
+
+        const nowPST = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+        const nowPSTDate = new Date(nowPST);
+
+        let isHappeningNow = false;
+        let nextEventStartTime = null;
+        let nextEventTimeString = '';
+
+        const upcomingEvents = [];
+
+        items.forEach(item => {
+          const title = item.querySelector('title').textContent;
+          const link = item.querySelector('link').textContent;
+          const description = item.querySelector('description').textContent;
+
+          const eventDateMatch = description.match(/<strong>Date:<\/strong>\s*(.*?)<br\/?>/);
+          const eventTimeMatch = description.match(/<strong>Time:<\/strong>\s*(.*?)<br\/?>/);
+
+          if (!eventDateMatch || !eventTimeMatch) return;
+
+          const eventDate = eventDateMatch[1].trim();
+          const eventTime = eventTimeMatch[1].trim();
+
+          const [startTimeStr, endTimeStr] = eventTime.split(' - ');
+
+          const startDateTime = new Date(`${eventDate} ${startTimeStr} PST`);
+          const endDateTime = new Date(`${eventDate} ${endTimeStr} PST`);
+
+          const isNow = nowPSTDate >= startDateTime && nowPSTDate <= endDateTime;
+
+          const eventElement = document.createElement('div');
+          eventElement.classList.add('event');
+          eventElement.innerHTML = `
+            <h3><a href="${link}" target="_blank">${title}</a></h3>
+            <p><strong>Date:</strong> ${eventDate}</p>
+            <p><strong>Time:</strong> ${eventTime}</p>
+          `;
+
+          if (isNow) {
+            eventElement.classList.add('happening-now');
+            statusNowContainer.innerHTML = `<div class="event happening-now">EVENT HAPPENING NOW!<br>${title}</div>`;
+            isHappeningNow = true;
+          } else {
+            upcomingEvents.push({ element: eventElement, startDateTime });
+            if (startDateTime > nowPSTDate && (!nextEventStartTime || startDateTime < nextEventStartTime)) {
+              nextEventStartTime = startDateTime;
+              nextEventTimeString = startDateTime.toLocaleTimeString('en-US', {
+                timeZone: 'America/Los_Angeles',
+                hour: 'numeric',
+                minute: '2-digit',
+              });
+            }
+          }
+        });
+
+        if (!isHappeningNow) {
+          if (nextEventStartTime) {
+            statusNowContainer.innerHTML = `<div class="available">AVAILABLE NOW – Room is Open until ${nextEventTimeString} PST</div>`;
+          } else {
+            statusNowContainer.innerHTML = `<div class="available">ROOM AVAILABLE – This space is open for the rest of the day. Please come in!</div>`;
+          }
+        }
+
+        // Sort upcoming events by date before appending
+        upcomingEvents.sort((a, b) => a.startDateTime - b.startDateTime);
+        upcomingEvents.forEach(eventObj => upcomingEventsContainer.appendChild(eventObj.element));
+
+      } catch (error) {
+        console.error("RSS Load Error:", error);
+        document.getElementById('status-now').innerText = "Failed to load events.";
+      }
+    }
+
+    loadRSS();
+  </script>
+</body>
+
+</html>

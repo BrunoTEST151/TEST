@@ -60,7 +60,7 @@
     .available {
       background-color: #008000;
       color: #ffffff;
-      font-size: 40px; /* Larger font size for available status */
+      font-size: 60px; /* Larger font size for available status */
     }
 
     /* Responsive styles */
@@ -142,7 +142,7 @@
 
           if (isNow) {
             eventElement.classList.add('happening-now');
-            statusNowContainer.innerHTML = `<div class="event happening-now">EVENT HAPPENING NOW!<br>${title}</div>`;
+            statusNowContainer.innerHTML = `<div class="event happening-now">EVENT HAPPENING NOW! - Room Unavailable<br>${title}</div>`;
             isHappeningNow = true;
           } else {
             upcomingEvents.push({ element: eventElement, startDateTime });

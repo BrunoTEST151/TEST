@@ -20,32 +20,34 @@
 
     .event,
     .available {
-      margin-bottom: 10px; /* Reduced spacing between reservations */
-      margin-bottom: 10px; /* 
-      padding: 15px; 
+      margin-bottom: 20px;
+      padding: 20px; /* Increased padding */
       border-radius: 8px;
-      font-size: 40px; 
+      font-size: 40px; /* Increased font size for events */
       font-weight: bold;
       background-color: #000000;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
     }
+
     .event h3 a {
-      font-size: 60px;
-      font-size: 55px;
+      font-size: 60px; /* Larger title font size */
       color: #00bfff;
       text-decoration: none;
     }
+
     .event h3 a:hover {
       text-decoration: underline;
     }
+
     .event p {
-      font-size: 50px;
+      font-size: 50px; /* Larger text for date and time */
       color: #f1f1f1;
       margin: 5px 0;
     }
+
     /* Divider between events */
     .event + .event {
-      border-top: 2px solid #ffffff; /* Reduced divider thickness */
+      border-top: 3px solid #ffffff; /* White divider line */
     }
 
     /* Specific styles for events happening now */
@@ -58,26 +60,21 @@
     .available {
       background-color: #008000;
       color: #ffffff;
-      font-size: 55px;
-    }
-
-    .available:hover {
-      background-color: #00a000;
-      transition: background-color 0.3s ease;
+      font-size: 55px; /* Larger font size for available status */
     }
 
     /* Responsive styles */
     @media (max-width: 768px) {
       .event, .available {
         font-size: 24px;
-        padding: 15px;
+        padding: 20px;
       }
     }
 
     @media (max-width: 480px) {
       .event, .available {
         font-size: 20px;
-        padding: 10px;
+        padding: 15px;
       }
 
       body {
@@ -163,7 +160,6 @@
         if (!isHappeningNow) {
           if (nextEventStartTime) {
             statusNowContainer.innerHTML = `<div class="available">AVAILABLE NOW – Room is Open until ${nextEventTimeString} PST</div>`;
-            statusNowContainer.innerHTML = `<div class="available">AVAILABLE Now – Room is Open until ${nextEventTimeString} PST</div>`;
           } else {
             statusNowContainer.innerHTML = `<div class="available">Available Now! – This space is open for the rest of the day.</div>`;
           }

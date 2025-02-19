@@ -20,7 +20,7 @@
 
     .event,
     .available {
-      margin-bottom: 10px; /* Reduced spacing between reservations */
+      margin-bottom: 10px; /* 
       padding: 15px; 
       border-radius: 8px;
       font-size: 40px; 
@@ -30,7 +30,7 @@
     }
 
     .event h3 a {
-      font-size: 60px;
+      font-size: 55px;
       color: #00bfff;
       text-decoration: none;
     }
@@ -164,7 +164,7 @@
 
         if (!isHappeningNow) {
           if (nextEventStartTime) {
-            statusNowContainer.innerHTML = `<div class="available">AVAILABLE NOW – Room is Open until ${nextEventTimeString} PST</div>`;
+            statusNowContainer.innerHTML = `<div class="available">AVAILABLE Now – Room is Open until ${nextEventTimeString} PST</div>`;
           } else {
             statusNowContainer.innerHTML = `<div class="available">Available Now! – This space is open for the rest of the day.</div>`;
           }

@@ -18,32 +18,17 @@
 
   <script>
     async function loadEvents() {
-      console.log("Starting to load events...");
+      const token = '67d794cd22920c2102555cf6155a0999cd9c0f0e'; // Your provided API token
 
       try {
-        console.log("Fetching token...");
-        const tokenResponse = await fetch('token.json');
-        const tokenData = await tokenResponse.json();
-        console.log("Token fetched:", tokenData);
-
-        const token = tokenData.access_token;
-        console.log("API Token:", token);
-
-        console.log("Fetching events...");
         const response = await fetch('https://lewistonlibrary.libcal.com/1.1/events?cal_id=6249', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!response.ok) {
-          console.error("Failed to fetch events:", response.status, response.statusText);
-          document.getElementById('status-now').innerText = 'Failed to load events.';
-          return;
-        }
-
         const data = await response.json();
-        console.log("Event data received:", data);
-
+        console.log("Event data:", data); // Log the response data for debugging
         const now = new Date();
+
         const statusNowContainer = document.getElementById('status-now');
         const upcomingEventsContainer = document.getElementById('upcoming-events');
 
@@ -54,13 +39,10 @@
         const upcomingEvents = [];
 
         data.events.forEach(event => {
-          console.log("Processing event:", event.title);
-
           const startDateTime = new Date(event.start);
           const endDateTime = new Date(event.end);
 
           const isNow = now >= startDateTime && now <= endDateTime;
-          console.log(`Event "${event.title}" is now:`, isNow);
 
           const eventElement = document.createElement('div');
           eventElement.classList.add('event');
@@ -71,7 +53,6 @@
           `;
 
           if (isNow) {
-            console.log(`Event "${event.title}" is happening now!`);
             eventElement.classList.add('happening-now');
             statusNowContainer.innerHTML = `<div class="event happening-now">EVENT HAPPENING NOW! - Room Unavailable<br>${event.title}</div>`;
             isHappeningNow = true;
@@ -86,22 +67,17 @@
 
         if (!isHappeningNow) {
           if (nextEventStartTime) {
-            console.log("Next event found, room available until:", nextEventTimeString);
             statusNowContainer.innerHTML = `<div class="available">AVAILABLE NOW – Room is Open until ${nextEventTimeString}</div>`;
           } else {
-            console.log("No upcoming events, room available for the rest of the day.");
             statusNowContainer.innerHTML = `<div class="available">ROOM AVAILABLE – This space is open for the rest of the day. Please come in!</div>`;
           }
         }
 
-        // Sort upcoming events by start date
         upcomingEvents.sort((a, b) => a.startDateTime - b.startDateTime);
-
-        console.log("Upcoming events:", upcomingEvents);
         upcomingEvents.forEach(eventObj => upcomingEventsContainer.appendChild(eventObj.element));
 
       } catch (error) {
-        console.error("Error occurred:", error);
+        console.error('Error:', error);
         document.getElementById('status-now').innerText = 'Failed to load events.';
       }
     }

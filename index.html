@@ -9,7 +9,7 @@
     .event, .available { margin-bottom: 20px; padding: 10px; border-radius: 8px; font-size: 35px; font-weight: bold; background-color: #000000; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); }
     .happening-now { background-color: #ff4500; }
     .available { background-color: #008000; color: #ffffff; }
-    .event h3 { color: #0000FF; } /* Blue font for event titles */
+    .event h3 { color: #00bfff; } /* Changed font color for event titles to sky blue */
     p { margin: 5px 0; } /* Added some margin for better spacing */
   </style>
 </head>
@@ -20,15 +20,12 @@
 
   <script>
     async function loadEvents() {
-      const token = '67d794cd22920c2102555cf6155a0999cd9c0f0e'; // Your provided API token
-
       try {
         const response = await fetch('https://lewistonlibrary.libcal.com/1.1/events?cal_id=6249', {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer your-token-here` },  // Replace with your token
         });
 
         const data = await response.json();
-        console.log("Event data:", data); // Log the response data for debugging
         const now = new Date();
 
         const statusNowContainer = document.getElementById('status-now');
@@ -55,7 +52,7 @@
           const eventElement = document.createElement('div');
           eventElement.classList.add('event');
 
-          const formattedStartDate = startDateTime.toLocaleDateString();
+          const formattedStartDate = startDateTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
           const formattedStartTime = startDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
           const formattedEndTime = endDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });

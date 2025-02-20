@@ -5,10 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Arial, sans-serif; padding: 25px; background-color: #121212; color: #ffffff; text-align: center; }
+    body { font-family: Arial, sans-serif; padding: 25px; background-color: #121212; color: #ffffff; text-align: left; }
     .event, .available { margin-bottom: 20px; padding: 10px; border-radius: 8px; font-size: 35px; font-weight: bold; background-color: #000000; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); }
     .happening-now { background-color: #ff4500; }
     .available { background-color: #008000; color: #ffffff; }
+    .event h3 { color: #0000FF; } /* Blue font for event titles */
+    p { margin: 5px 0; } /* Added some margin for better spacing */
   </style>
 </head>
 
@@ -38,18 +40,30 @@
 
         const upcomingEvents = [];
 
+        const oneWeekLater = new Date();
+        oneWeekLater.setDate(now.getDate() + 7); // Get the date 7 days ahead
+
+        // Filter events for the week ahead
         data.events.forEach(event => {
           const startDateTime = new Date(event.start);
           const endDateTime = new Date(event.end);
+
+          if (startDateTime < now || startDateTime > oneWeekLater) return; // Skip events outside the week ahead
 
           const isNow = now >= startDateTime && now <= endDateTime;
 
           const eventElement = document.createElement('div');
           eventElement.classList.add('event');
+
+          const formattedStartDate = startDateTime.toLocaleDateString();
+          const formattedStartTime = startDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+          const formattedEndTime = endDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
           eventElement.innerHTML = `
             <h3>${event.title}</h3>
-            <p>Date: ${startDateTime.toLocaleDateString()}</p>
-            <p>Time: ${startDateTime.toLocaleTimeString()} - ${endDateTime.toLocaleTimeString()}</p>
+            <p><strong>Date:</strong> ${formattedStartDate}</p>
+            <p><strong>Time:</strong> ${formattedStartTime} - ${formattedEndTime}</p>
           `;
 
           if (isNow) {
@@ -73,8 +87,9 @@
           }
         }
 
+        // Show only the first 3 upcoming events
         upcomingEvents.sort((a, b) => a.startDateTime - b.startDateTime);
-        upcomingEvents.forEach(eventObj => upcomingEventsContainer.appendChild(eventObj.element));
+        upcomingEvents.slice(0, 3).forEach(eventObj => upcomingEventsContainer.appendChild(eventObj.element));
 
       } catch (error) {
         console.error('Error:', error);

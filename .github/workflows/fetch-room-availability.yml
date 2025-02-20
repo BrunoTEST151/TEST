@@ -1,7 +1,7 @@
 name: Fetch LibCal Room Availability
 
 on:
-  workflow_dispatch: # This lets you manually trigger it
+  workflow_dispatch:  # This lets you manually trigger it
 
 jobs:
   get-availability:
@@ -17,7 +17,17 @@ jobs:
             -d "client_secret=${{ secrets.LIBCAL_CLIENT_SECRET }}" \
             -d "grant_type=client_credentials")
           
+          echo "RESPONSE: $RESPONSE"  # Log the raw response for debugging
+
+          # Attempt to parse the access token
           TOKEN=$(echo $RESPONSE | jq -r '.access_token')
+          
+          # If no token is found, exit with an error
+          if [ "$TOKEN" == "null" ]; then
+            echo "Error: No access token received."
+            exit 1
+          fi
+
           echo "ACCESS_TOKEN=$TOKEN" >> $GITHUB_ENV
 
       - name: Fetch Room Availability

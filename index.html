@@ -5,12 +5,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Arial, sans-serif; padding: 25px; background-color: #121212; color: #ffffff; text-align: left; }
-    .event, .available { margin-bottom: 20px; padding: 10px; border-radius: 8px; font-size: 35px; font-weight: bold; background-color: #000000; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); }
-    .happening-now { background-color: #ff4500; }
-    .available { background-color: #008000; color: #ffffff; }
-    .event h3 { color: #00bfff; } /* Changed font color for event titles to sky blue */
-    p { margin: 5px 0; } /* Added some margin for better spacing */
+    body { 
+      font-family: Arial, sans-serif; 
+      padding: 25px; 
+      background-color: #121212; 
+      color: #ffffff; 
+      text-align: left; 
+    }
+    
+    .event, .available { 
+      margin-bottom: 20px; 
+      padding: 10px; 
+      border-radius: 8px; 
+      font-size: 35px; 
+      font-weight: bold; 
+      background-color: #609abe; /* Updated background color */
+      color: #ffffff; /* Updated font color to white */
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); 
+    }
+
+    .happening-now { 
+      background-color: #ff4500; 
+    }
+
+    .available { 
+      background-color: #008000; 
+      color: #ffffff; 
+    }
+
+    .event h3 { 
+      color: #ffffff; /* Ensure event titles are white */
+    }
+
+    p { 
+      margin: 5px 0; /* Added some margin for better spacing */
+    }
   </style>
 </head>
 
@@ -22,7 +51,7 @@
     async function loadEvents() {
       try {
         const response = await fetch('https://lewistonlibrary.libcal.com/1.1/events?cal_id=6249', {
-          headers: { Authorization: `Bearer 21bd411bd35418f95b47962371afdaf1d0484ecc`},  // Replace with your token
+          headers: { Authorization: `Bearer 190875211342ffe59803f8eae32d9e1b47d453e1`},  // Replace with your token
         });
 
         const data = await response.json();

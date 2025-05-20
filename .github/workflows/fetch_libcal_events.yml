@@ -2,17 +2,14 @@ name: Fetch LibCal Events Every Hour
 
 on:
   schedule:
-    - cron: '0 * * * *' # Every hour on the hour
-  workflow_dispatch: # Optional: allows manual run
+    - cron: '0 * * * *'   # every hour on the hour
+  workflow_dispatch:      # allows manual trigger
 
 jobs:
   fetch-events:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Get Access Token from LibCal
         id: get_token
         run: |
@@ -21,9 +18,7 @@ jobs:
             -d "client_id=${{ secrets.LIBCAL_CLIENT_ID }}" \
             -d "client_secret=${{ secrets.LIBCAL_CLIENT_SECRET }}" \
             -d "grant_type=client_credentials")
-
-          echo "RESPONSE: $RESPONSE"
-
+          echo "Response: $RESPONSE"
           TOKEN=$(echo $RESPONSE | jq -r '.access_token')
           if [[ -z "$TOKEN" || "$TOKEN" == "null" ]]; then
             echo "Failed to get token!"
@@ -33,6 +28,12 @@ jobs:
 
       - name: Fetch Events from LibCal
         run: |
-          curl -X GET "https://lewistonlibrary.libcal.com/1.1/events?cal_id=6249" \
-          -H "Authorization: Bearer $ACCESS_TOKEN"
+          curl -X GET "https://lewistonlibrary.libcal.com/1.1/events?cal_id=21834" \
+          -H "Authorization: Bearer $ACCESS_TOKEN" > events.json
+          echo "Events saved to events.json"
+          
+      - name: Show first 300 characters of events
+        run: |
+          head -c 300 events.json
+
 

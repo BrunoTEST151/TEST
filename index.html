@@ -51,8 +51,9 @@
   <script>
     async function loadEvents() {
       try {
-        const response = await fetch('https://lewistonlibrary.libcal.com/1.1/events?cal_id=21834', {
-          headers: {Authorization: `Bearer 773a9b205be20eec8c3bd3397175fa59a7430a74`},  // Replace with your token
+        const response = await fetch('/events.json');
+      const data = await response.json();
+       // Replace with your token
         });
 
         const data = await response.json();

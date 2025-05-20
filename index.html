@@ -1,132 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      padding: 25px; 
-      background-color: #121212; 
-      color: #ffffff; 
-      text-align: left; 
-    }
-    
-    .event, .available { 
-      margin-bottom: 20px; 
-      padding: 10px; 
-      border-radius: 8px; 
-      font-size: 40px; 
-      font-weight: bold; 
-      background-color: #609abe; /* Updated background color */
-      color: #ffffff; /* Updated font color to white */
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); 
-    }
-
-    .happening-now { 
-      background-color: #ff4500; 
-    }
-
-    .available { 
-      background-color: #008000; 
-      color: #ffffff; 
-    }
-
-    .event h3 { 
-      font-size: 40px; /* Increase this value for larger font size */
-      color: #ffffff; /* Ensure event titles are white */
-    }
-
-    p { 
-      margin: 5px 0; /* Added some margin for better spacing */
-    }
-  </style>
-</head>
-
-<body>
-  <div id="status-now">Loading...</div>
-  <div id="upcoming-events"></div>
-
-  <script>
-    async function loadEvents() {
-      try {
-        const response = await fetch('/events.json');
+<script>
+  async function loadEvents() {
+    try {
+      const response = await fetch('/events.json');
       const data = await response.json();
-       // Replace with your token
-        });
 
-        const data = await response.json();
-        const now = new Date();
+      const now = new Date();
+      const statusNowContainer = document.getElementById('status-now');
+      const upcomingEventsContainer = document.getElementById('upcoming-events');
 
-        const statusNowContainer = document.getElementById('status-now');
-        const upcomingEventsContainer = document.getElementById('upcoming-events');
+      let isHappeningNow = false;
+      let nextEventStartTime = null;
+      let nextEventTimeString = '';
 
-        let isHappeningNow = false;
-        let nextEventStartTime = null;
-        let nextEventTimeString = '';
+      const upcomingEvents = [];
 
-        const upcomingEvents = [];
+      const oneWeekLater = new Date();
+      oneWeekLater.setDate(now.getDate() + 7); // 7 days ahead
 
-        const oneWeekLater = new Date();
-        oneWeekLater.setDate(now.getDate() + 7); // Get the date 7 days ahead
+      data.events.forEach(event => {
+        const startDateTime = new Date(event.start);
+        const endDateTime = new Date(event.end);
 
-        // Filter events for the week ahead
-        data.events.forEach(event => {
-          const startDateTime = new Date(event.start);
-          const endDateTime = new Date(event.end);
+        if (startDateTime < now || startDateTime > oneWeekLater) return;
 
-          if (startDateTime < now || startDateTime > oneWeekLater) return; // Skip events outside the week ahead
+        const isNow = now >= startDateTime && now <= endDateTime;
 
-          const isNow = now >= startDateTime && now <= endDateTime;
+        const eventElement = document.createElement('div');
+        eventElement.classList.add('event');
 
-          const eventElement = document.createElement('div');
-          eventElement.classList.add('event');
+        const formattedStartDate = startDateTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        const formattedStartTime = startDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        const formattedEndTime = endDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
-          const formattedStartDate = startDateTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-          const formattedStartTime = startDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        eventElement.innerHTML = `
+          <h3>${event.title}</h3>
+          <p><strong>Date:</strong> ${formattedStartDate}</p>
+          <p><strong>Time:</strong> ${formattedStartTime} - ${formattedEndTime}</p>
+        `;
 
-          const formattedEndTime = endDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-
-          eventElement.innerHTML = `
-            <h3>${event.title}</h3>
-            <p><strong>Date:</strong> ${formattedStartDate}</p>
-            <p><strong>Time:</strong> ${formattedStartTime} - ${formattedEndTime}</p>
-          `;
-
-          if (isNow) {
-            eventElement.classList.add('happening-now');
-            statusNowContainer.innerHTML = `<div class="event happening-now">EVENT HAPPENING NOW! - Room Unavailable<br>${event.title}</div>`;
-            isHappeningNow = true;
-          } else {
-            upcomingEvents.push({ element: eventElement, startDateTime });
-            if (startDateTime > now && (!nextEventStartTime || startDateTime < nextEventStartTime)) {
-              nextEventStartTime = startDateTime;
-              nextEventTimeString = startDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-            }
-          }
-        });
-
-        if (!isHappeningNow) {
-          if (nextEventStartTime) {
-            statusNowContainer.innerHTML = `<div class="available">AVAILABLE NOW – Room is Open until ${nextEventTimeString}</div>`;
-          } else {
-            statusNowContainer.innerHTML = `<div class="available">ROOM AVAILABLE – This space is open for the rest of the day. Please come in!</div>`;
+        if (isNow) {
+          eventElement.classList.add('happening-now');
+          statusNowContainer.innerHTML = `<div class="event happening-now">EVENT HAPPENING NOW! - Room Unavailable<br>${event.title}</div>`;
+          isHappeningNow = true;
+        } else {
+          upcomingEvents.push({ element: eventElement, startDateTime });
+          if (startDateTime > now && (!nextEventStartTime || startDateTime < nextEventStartTime)) {
+            nextEventStartTime = startDateTime;
+            nextEventTimeString = startDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
           }
         }
+      });
 
-        // Show only the first 3 upcoming events
-        upcomingEvents.sort((a, b) => a.startDateTime - b.startDateTime);
-        upcomingEvents.slice(0, 3).forEach(eventObj => upcomingEventsContainer.appendChild(eventObj.element));
-
-      } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('status-now').innerText = 'Failed to load events.';
+      if (!isHappeningNow) {
+        if (nextEventStartTime) {
+          statusNowContainer.innerHTML = `<div class="available">AVAILABLE NOW – Room is Open until ${nextEventTimeString}</div>`;
+        } else {
+          statusNowContainer.innerHTML = `<div class="available">ROOM AVAILABLE – This space is open for the rest of the day. Please come in!</div>`;
+        }
       }
+
+      // Show only first 3 upcoming events
+      upcomingEvents.sort((a, b) => a.startDateTime - b.startDateTime);
+      upcomingEvents.slice(0, 3).forEach(eventObj => upcomingEventsContainer.appendChild(eventObj.element));
+
+    } catch (error) {
+      console.error('Error:', error);
+      document.getElementById('status-now').innerText = 'Failed to load events.';
     }
+  }
 
-    loadEvents();
-  </script>
-</body>
-
-</html>
+  loadEvents();
+</script>
